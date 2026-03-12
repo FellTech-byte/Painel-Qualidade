@@ -22,6 +22,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .
-
-**O que isso faz?**
-A função `sed` busca o texto `FIREBASE_API_KEY_PLACEHOLDER` dentro do seu `index.html` e o substitui pelo valor que você guardou de forma segura no **GitHub Secrets**. Assim, seu código fonte no repositório permanece seguro, mas o site publicado funciona perfeitamente!
