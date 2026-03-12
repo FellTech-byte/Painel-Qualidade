@@ -1,0 +1,27 @@
+name: Inject Secrets and Deploy
+
+on:
+  push:
+    branches:
+      - main  # ou a sua branch principal
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Inject Firebase API Key
+        run: |
+          sed -i 's/FIREBASE_API_KEY_PLACEHOLDER/${{ secrets.FIREBASE_API_KEY }}/g' index.html
+
+      # Se você usa o GitHub Pages para hospedar, adicione os passos de deploy aqui
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+
+**O que isso faz?**
+A função `sed` busca o texto `FIREBASE_API_KEY_PLACEHOLDER` dentro do seu `index.html` e o substitui pelo valor que você guardou de forma segura no **GitHub Secrets**. Assim, seu código fonte no repositório permanece seguro, mas o site publicado funciona perfeitamente!
