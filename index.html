@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qualidade e Segurança | Gestão Corporativa</title>
+    
+    <!-- Google Fonts & Bibliotecas -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+    <style>
+        :root {
+            --cor-primaria: #01455C;
+            --cor-secundaria: #9FC419;
+            --cor-texto-claro: #ffffff;
+            --cor-texto-escuro: #1e293b;
+            --cor-fundo: #f8fafc;
+            --cor-alerta: #ef4444;
+            --cor-aviso: #f59e0b;
+            --cor-card-bg: #ffffff;
+            --transicao: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --sombra-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --sombra-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --sombra-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            background-color: var(--cor-fundo); 
+            color: var(--cor-texto-escuro); 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- Tela de Autenticação --- */
+        #auth-screen { 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: linear-gradient(135deg, #01455C 0%, #002d3c 100%); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 10000; 
+        }
+        .auth-box { 
+            background: rgba(255, 255, 255, 0.98); 
+            padding: 48px; 
+            border-radius: 24px; 
+            width: 90%; 
+            max-width: 420px; 
+            text-align: center; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
+        }
+        .auth-box h2 { color: var(--cor-primaria); font-size: 1.75rem; margin-bottom: 8px; font-weight: 700; letter-spacing: -0.025em; }
+        .auth-box p { color: #64748b; margin-bottom: 32px; font-size: 0.95rem; }
+        
+        #auth-error-msg {
+            background-color: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fee2e2;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            display: none;
+            line-height: 1.5;
+        }
+
+        .auth-input { 
+            width: 100%; 
+            padding: 14px 16px; 
+            margin-bottom: 16px; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 10px; 
+            font-size: 1rem; 
+            transition: var(--transicao); 
+            background: #f8fafc;
+        }
+        .auth-input:focus { 
+            border-color: var(--cor-primaria); 
+            background: white;
+            outline: none; 
+            box-shadow: 0 0 0 4px rgba(1, 69, 92, 0.1); 
+        }
+        
+        .auth-btn { 
+            width: 100%; 
+            padding: 14px; 
+            background: var(--cor-secundaria); 
+            border: none; 
+            color: var(--cor-primaria); 
+            font-weight: 700; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 1rem; 
+            transition: var(--transicao); 
+            margin-top: 8px;
+        }
+        .auth-btn:hover { background: #8db014; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(159, 196, 25, 0.3); }
+        
+        .auth-links-container { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
+        .auth-toggle-link { color: #64748b; text-decoration: none; font-size: 0.85rem; cursor: pointer; transition: var(--transicao); }
+        .auth-toggle-link:hover { color: var(--cor-primaria); text-decoration: underline; }
+
+        /* --- Header Moderno --- */
+        header { 
+            background-color: var(--cor-primaria); 
+            padding: 0 40px; 
+            height: 72px;
+            box-shadow: var(--sombra-md); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: sticky;
+            top: 0;
+            z-index: 1000; 
+        }
+        .logo { font-size: 1.25rem; font-weight: 800; color: var(--cor-texto-claro); letter-spacing: -0.02em; }
+
+        nav ul { margin: 0; padding: 0; list-style: none; display: flex; gap: 8px; align-items: center; }
+        nav a { 
+            text-decoration: none; 
+            color: rgba(255,255,255,0.7); 
+            font-weight: 500; 
+            padding: 8px 16px; 
+            border-radius: 8px;
+            cursor: pointer; 
+            transition: var(--transicao); 
+            font-size: 0.875rem; 
+        }
+        nav a:hover { color: var(--cor-texto-claro); background: rgba(255,255,255,0.1); }
+        nav a.active { color: var(--cor-primaria); background: var(--cor-secundaria); font-weight: 600; }
+        
+        .btn-logout { 
+            background: rgba(239, 68, 68, 0.1); 
+            border: 1px solid rgba(239, 68, 68, 0.2); 
+            color: #fca5a5; 
+            padding: 8px 16px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 0.8rem; 
+            font-weight: 600;
+            margin-left: 12px;
+            transition: var(--transicao); 
+        }
+        .btn-logout:hover { background: #ef4444; color: white; border-color: #ef4444; }
+        
+        /* --- Container & Layout --- */
+        .container { 
+            display: none; 
+            max-width: 1440px; 
+            margin: 0 auto; 
+            padding: 32px 40px; 
+            width: 100%; 
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .container.show { display: block; opacity: 1; transform: translateY(0); }
+
+        /* KPIs Estilo Premium */
+        .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; margin-bottom: 32px; }
+        .kpi-card { 
+            background: white; 
+            padding: 24px; 
+            border-radius: 16px; 
+            border: 1px solid #e2e8f0; 
+            transition: var(--transicao);
+            box-shadow: var(--sombra-sm);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .kpi-card:hover { transform: translateY(-4px); box-shadow: var(--sombra-lg); border-color: var(--cor-secundaria); }
+        .kpi-card h3 { margin: 0 0 8px 0; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; }
+        .kpi-card .value { font-size: 2.25rem; font-weight: 800; color: var(--cor-primaria); letter-spacing: -0.04em; }
+        .kpi-card .sub-value { font-size: 0.7rem; color: #94a3b8; margin-top: 6px; line-height: 1.4; border-top: 1px solid #f1f5f9; padding-top: 8px; }
+
+        /* Filtros */
+        .filter-bar { 
+            background: #fff; 
+            padding: 16px; 
+            border-radius: 12px; 
+            margin-bottom: 24px; 
+            display: flex; 
+            gap: 16px; 
+            align-items: flex-start; 
+            flex-wrap: wrap; 
+            box-shadow: var(--sombra-sm);
+            border: 1px solid #e2e8f0;
+        }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; position: relative; }
+        .filter-group label { font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-left: 4px; }
+        
+        .filter-bar select { 
+            padding: 10px 14px; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 8px; 
+            min-width: 180px; 
+            font-size: 0.875rem; 
+            color: #475569;
+            transition: var(--transicao); 
+            background: #f8fafc;
+            cursor: pointer;
+        }
+        .filter-bar select:focus { border-color: var(--cor-primaria); outline: none; background: white; }
+
+        /* --- CUSTOM MULTISELECT DROPDOWN --- */
+        .custom-multiselect {
+            width: 220px;
+            position: relative;
+            user-select: none;
+        }
+        .multiselect-selected {
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            color: #475569;
+            background: #f8fafc url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") no-repeat right 0.5rem center/1.5em 1.5em;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: var(--transicao);
+        }
+        .multiselect-selected:hover { border-color: #cbd5e1; }
+        .multiselect-options {
+            display: none;
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            box-shadow: var(--sombra-lg);
+            z-index: 100;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+        .multiselect-options.show { display: block; }
+        .multiselect-option {
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: #334155;
+            transition: background 0.2s;
+        }
+        .multiselect-option:hover { background: #f1f5f9; }
+        .multiselect-option input { 
+            width: 16px; height: 16px; cursor: pointer; 
+            accent-color: var(--cor-primaria);
+        }
+
+        .btn-clear { background: #fff; border: 1px solid #e2e8f0; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 0.875rem; font-weight: 500; transition: var(--transicao); align-self: flex-end; margin-bottom: 5px; }
+        .btn-clear:hover { background: #f1f5f9; border-color: #cbd5e1; }
+
+        /* Dashboard Visual */
+        .dashboard-grid { display: grid; grid-template-columns: 360px 1fr; gap: 24px; margin-bottom: 32px; }
+        .chart-box { 
+            background: #fff; 
+            padding: 24px; 
+            border-radius: 16px; 
+            box-shadow: var(--sombra-sm); 
+            border: 1px solid #e2e8f0;
+            height: 380px; 
+            display: flex;
+            flex-direction: column;
+        }
+        .cards-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; overflow-y: auto; max-height: 380px; padding: 4px; }
+        .summary-mini-card { 
+            background: #fff; 
+            border-left: 5px solid var(--cor-primaria); 
+            padding: 16px; 
+            border-radius: 12px; 
+            box-shadow: var(--sombra-sm); 
+            transition: var(--transicao); 
+            border: 1px solid #e2e8f0;
+            border-left-width: 5px;
+        }
+        .summary-mini-card:hover { transform: scale(1.02); box-shadow: var(--sombra-md); border-left-color: var(--cor-secundaria); }
+        .summary-mini-card .title { font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .summary-mini-card .main-count { font-size: 1.5rem; font-weight: 800; color: var(--cor-primaria); }
+
+        /* Tabela Premium */
+        .table-container { background-color: #fff; border-radius: 16px; box-shadow: var(--sombra-sm); border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 32px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 16px; background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; cursor: pointer; transition: var(--transicao); }
+        th:hover { background: #f1f5f9; color: var(--cor-primaria); }
+        td { padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 0.875rem; color: #334155; }
+        tbody tr:hover td { background-color: #f8fafc; }
+
+        /* Badges Minimalistas */
+        .status-badge { padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.02em; }
+        .status-Fechado { background-color: #dcfce7; color: #166534; }
+        .status-Aberta { background-color: #fee2e2; color: #991b1b; }
+        .status-Emanálise { background-color: #fef3c7; color: #92400e; }
+        .status-Crítica { background-color: #7f1d1d; color: #fee2e2; }
+        .status-Informativo { background-color: #f1f5f9; color: #475569; }
+
+        /* PDF Viewer */
+        #pdf-render-container { 
+            background: #f1f5f9; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 16px; 
+            overflow: hidden; 
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+        }
+        #pdf-frame { width: 100%; height: 75vh; border: none; }
+
+        .report-item { 
+            flex: 0 0 180px; 
+            background: #fff; 
+            border: 1px solid #e2e8f0; 
+            padding: 16px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: var(--transicao); 
+            box-shadow: var(--sombra-sm);
+        }
+        .report-item:hover { transform: translateY(-4px); box-shadow: var(--sombra-md); border-color: var(--cor-secundaria); }
+        .report-item.active { border-color: var(--cor-secundaria); background: #f7fee7; border-width: 2px; }
+
+        /* Rodapé */
+        #app-footer { 
+            background-color: var(--cor-primaria); 
+            color: rgba(255, 255, 255, 0.6); 
+            padding: 20px 40px; 
+            font-size: 0.75rem; 
+            margin-top: auto; 
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: none; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .footer-role-badge { background: var(--cor-secundaria); color: var(--cor-primaria); padding: 2px 8px; border-radius: 4px; font-weight: 800; margin-left: 8px; }
+
+        /* Modais */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
+        .modal-content { 
+            background-color: #fff; margin: 20px auto; padding: 32px; border-radius: 20px; width: 90%; max-width: 750px; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: modalIn 0.3s ease-out;
+            max-height: 94vh; overflow-y: auto; position: relative;
+        }
+        @keyframes modalIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .btn-success { 
+            background: var(--cor-secundaria); color: var(--cor-primaria); border: none; padding: 12px 24px; border-radius: 8px; 
+            cursor: pointer; font-weight: 700; transition: var(--transicao); font-size: 0.9rem;
+        }
+        .btn-success:hover { background: #8db014; transform: scale(1.02); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        @media (max-width: 1024px) {
+            header { padding: 0 20px; }
+            .container { padding: 20px; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .chart-box { height: 300px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TELA DE AUTENTICAÇÃO -->
+    <div id="auth-screen">
+        <div class="auth-box">
+            <h2>Qualidade & Segurança</h2>
+            <p>Acesse o portal de gestão e relatórios</p>
+            <div id="auth-error-msg"></div>
+            <input type="email" id="email-input" class="auth-input" placeholder="E-mail corporativo">
+            <input type="password" id="password-input" class="auth-input" placeholder="Senha">
+            <button id="login-btn" class="auth-btn">Acessar Sistema</button>
+            <div class="auth-links-container">
+                <a id="auth-toggle" class="auth-toggle-link">Criar nova conta de usuário</a>
+                <a id="forgot-password-link" class="auth-toggle-link">Esqueceu sua senha de acesso?</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA DE CARREGAMENTO -->
+    <div id="loading-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:white; display:none; flex-direction:column; justify-content:center; align-items:center; z-index:9999;">
+        <div style="width:40px; height:40px; border:4px solid #f3f3f3; border-top:4px solid var(--cor-primaria); border-radius:50%; animation:spin 1s linear infinite;"></div>
+        <p style="margin-top:16px; color:var(--cor-primaria); font-weight:600; font-size:0.8rem; letter-spacing:1px;">CARREGANDO SISTEMA...</p>
+    </div>
+    <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+
+    <header id="app-header" style="display:none;">
+        <div class="logo">QS PORTAL</div>
+        <nav>
+            <ul>
+                <li><a id="nav-dashboard" class="active">Atas</a></li>
+                <li><a id="nav-report">Periódicos</a></li>
+                <li><a id="nav-relatorios-esp">Específicos</a></li>
+                <li><a id="nav-apontamentos">Apontamentos</a></li>
+                <li><a id="nav-ckl">Segurança</a></li>
+                <li><a id="nav-logs" style="display:none;">Admin</a></li>
+                <li><button id="logout-btn" class="btn-logout">Sair</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard-page" class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 32px;">
+            <h1 style="margin:0; font-size: 1.5rem; font-weight: 800; color: var(--cor-primaria); letter-spacing:-0.03em;">Gestão de Atas</h1>
+            <button id="btn-add-item-admin" style="display:none; background:var(--cor-secundaria); color:var(--cor-primaria); border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:700; transition:var(--transicao);">+ Novo Registro</button>
+        </div>
+        
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <h3>Performance</h3>
+                <div id="kpi-performance" class="value">0%</div>
+                <div class="sub-value"><strong>Cálculo:</strong> Fechados / (Abertos + Em Análise + Críticos + Fechados). Ignora Informativos.</div>
+            </div>
+            <div class="kpi-card">
+                <h3>Tempo Médio</h3>
+                <div id="kpi-sla" class="value">0d</div>
+                <div class="sub-value"><strong>Cálculo:</strong> Média de dias corridos entre a Data da Ata e a Conclusão (Somente itens Fechados).</div>
+            </div>
+            <div class="kpi-card">
+                <h3>Pendentes</h3>
+                <div id="kpi-open" class="value">0</div>
+                <div class="sub-value">Total de registros com status <strong>Aberta</strong>, <strong>Em análise</strong> ou <strong>Crítica</strong>.</div>
+            </div>
+            <div class="kpi-card">
+                <h3>Total</h3>
+                <div id="kpi-total-filtered" class="value">0</div>
+                <div class="sub-value">Contagem total de registros considerando os filtros aplicados acima.</div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>Status</label>
+                <div class="custom-multiselect" id="status-multiselect">
+                    <div class="multiselect-selected" id="multiselect-status-label">Carregando status...</div>
+                    <div class="multiselect-options" id="multiselect-status-options"></div>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>Tema</label>
+                <select id="filter-tema"></select>
+            </div>
+            <div class="filter-group">
+                <label>Assunto</label>
+                <select id="filter-assunto"></select>
+            </div>
+            <button id="btn-clear-filters" class="btn-clear">Limpar Tudo</button>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="chart-box">
+                <h4 style="margin:0 0 20px 0; font-size: 0.75rem; color: #94a3b8; text-transform:uppercase; letter-spacing:0.05em;">Status de Atendimento</h4>
+                <div style="flex:1; position:relative;"><canvas id="statusChart"></canvas></div>
+            </div>
+            <div id="summary-cards-list" class="cards-list"></div>
+        </div>
+
+        <div class="table-container">
+            <table id="dataTable">
+                <thead><tr>
+                    <th width="60" id="th-seq" onclick="handleSort('seq')">Seq.</th>
+                    <th width="110" id="th-dataAta" onclick="handleSort('dataAta')">Data</th>
+                    <th width="140" id="th-tema" onclick="handleSort('tema')">Tema</th>
+                    <th id="th-assunto" onclick="handleSort('assunto')">Assunto</th>
+                    <th width="150" id="th-responsavel" onclick="handleSort('responsavel')">Responsável</th>
+                    <th width="110" id="th-dataConclusao" onclick="handleSort('dataConclusao')">Conclusão</th>
+                    <th width="120" id="th-status" onclick="handleSort('status')">Status</th>
+                </tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- RELATÓRIOS -->
+    <div id="report-page" class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <h1 style="margin:0; font-size: 1.5rem; font-weight:800; color: var(--cor-primaria);">Relatórios Periódicos</h1>
+                <button id="btn-maximize-report" style="background:#f1f5f9; border:none; width:36px; height:36px; border-radius:10px; cursor:pointer; color:var(--cor-primaria);">⛶</button>
+            </div>
+            <div id="admin-report-controls" style="display:none; background: #fff; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; align-items: center; gap: 12px;">
+                <input type="date" id="report-date-input" style="padding: 6px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.8rem;">
+                <input type="file" id="report-file-input" accept="application/pdf" style="display:none;">
+                <button id="btn-trigger-upload-new" class="btn-success" style="padding: 6px 12px; font-size: 0.8rem;">Subir PDF</button>
+                <button id="btn-update-rev" class="btn-success" style="padding: 6px 12px; font-size: 0.8rem; background:#64748b; display:none;">Atualizar</button>
+                <span id="upload-status" style="font-size:0.7rem; color:var(--cor-secundaria); font-weight: 700;"></span>
+            </div>
+        </div>
+        <div id="pdf-render-container">
+            <p id="no-pdf-msg" style="color:#94a3b8; display:none; padding:100px; text-align:center; font-weight:500;">Nenhum arquivo selecionado para visualização.</p>
+            <iframe id="pdf-frame" src=""></iframe>
+        </div>
+        <div style="display:flex; gap:16px; overflow-x:auto; padding:8px 4px;" id="reports-carousel"></div>
+    </div>
+
+    <!-- ESPECÍFICOS -->
+    <div id="relatorios-esp-page" class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 32px;">
+            <div>
+                <h1 style="margin:0; font-size: 1.5rem; font-weight:800; color: var(--cor-primaria);">Relatórios Técnicos</h1>
+                <p style="margin:4px 0 0 0; color:#64748b; font-size:0.9rem;">Inspeções técnicas e diagnósticos específicos.</p>
+            </div>
+            <div id="admin-spec-controls" style="display:none; gap:12px;">
+                <input type="file" id="json-spec-input" accept=".json" style="display:none;">
+                <button id="btn-import-json-spec" class="btn-clear" style="font-weight:600;">Importar JSON</button>
+                <button id="btn-new-spec-manual" class="btn-success">+ Criar Registro</button>
+                <input type="file" id="pdf-spec-upload-hidden" accept="application/pdf" style="display:none;">
+            </div>
+        </div>
+        <div id="extra-reports-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;"></div>
+    </div>
+
+    <!-- EXTERNOS -->
+    <div id="apontamentos-page" class="container"><iframe src="https://fluz1.github.io/SnagR37/" style="width:100%; height:82vh; border:none; border-radius:16px; box-shadow:var(--sombra-md);"></iframe></div>
+    <div id="ckl-page" class="container"><iframe src="https://fluz1.github.io/SSO/" style="width:100%; height:82vh; border:none; border-radius:16px; box-shadow:var(--sombra-md);"></iframe></div>
+
+    <div id="logs-page" class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+            <h1 style="margin:0; font-size: 1.5rem; font-weight:800; color: var(--cor-primaria);">Auditoria</h1>
+            <button id="btn-download-logs" class="btn-clear">Exportar Log TXT</button>
+        </div>
+        <div class="table-container"><table id="logsTable"><thead><tr><th>Timestamp</th><th>Usuário</th><th>Ação</th><th>Módulo</th><th>ID Doc</th><th>Detalhes</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <!-- MODAIS -->
+    <div id="historyModal" class="modal"><div class="modal-content"><span style="float:right; cursor:pointer; font-size:1.5rem;" onclick="closeModal('historyModal')">&times;</span><h3 id="hist-title" style="color:var(--cor-primaria); margin-top:0;">Histórico</h3><div id="hist-content" style="background:#f8fafc; padding:20px; border-radius:12px; font-size:0.9rem; line-height:1.6; color:#475569;"></div></div></div>
+    
+    <!-- Modal Visualizador de PDF Específicos -->
+    <div id="specPdfModal" class="modal">
+        <div class="modal-content" style="max-width: 95vw; height: 95vh; padding: 10px;">
+            <span style="position: absolute; right: 20px; top: 10px; cursor: pointer; font-size: 2rem; z-index: 10;" onclick="closeModal('specPdfModal')">&times;</span>
+            <iframe id="spec-pdf-frame" src="" style="width:100%; height:100%; border:none; border-radius:12px;"></iframe>
+        </div>
+    </div>
+
+    <div id="viewModal" class="modal">
+        <div class="modal-content">
+            <span style="float:right; cursor:pointer; font-size:1.5rem;" onclick="closeModal('viewModal')">&times;</span>
+            <h3 id="view-modal-title" style="color:var(--cor-primaria); margin-top:0;">Detalhes</h3>
+            <div style="margin-bottom:24px;">
+                <h4 style="font-size:0.75rem; text-transform:uppercase; color:#94a3b8; margin-bottom:8px;">Descrição do Registro</h4>
+                <p id="view-descricao" style="font-size:0.95rem; color:#334155; line-height:1.6;">...</p>
+            </div>
+            <div style="margin-bottom:24px;">
+                <h4 style="font-size:0.75rem; text-transform:uppercase; color:#94a3b8; margin-bottom:8px;">Plano de Ação / Resposta</h4>
+                <div id="view-acao-container"></div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:12px; padding-top:20px; border-top:1px solid #f1f5f9;">
+                <button id="btn-save-acao-editor" class="btn-success" style="display:none;">Gravar Resposta</button>
+                <button id="btn-open-edit-admin" class="btn-clear" style="display:none; color:var(--cor-primaria);">Editar Admin</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span style="float:right; cursor:pointer; font-size:1.5rem;" onclick="closeModal('editModal')">&times;</span>
+            <h3 style="color:var(--cor-primaria); margin-top:0;">Gestão Administrativa</h3>
+            <form id="ata-form" style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                <input type="hidden" id="edit-id">
+                <div><label style="font-size:0.75rem; font-weight:700; color:#64748b;">Seq:</label><input type="text" id="edit-seq" readonly class="auth-input" style="background:#f1f5f9;"></div>
+                <div><label style="font-size:0.75rem; font-weight:700; color:#64748b;">Data da Ata:</label><input type="date" id="edit-data" class="auth-input"></div>
+                <div style="grid-column:span 2;"><label style="font-size:0.75rem; font-weight:700; color:#64748b;">Assunto:</label><input type="text" id="edit-assunto" class="auth-input"></div>
+                <div style="grid-column:span 2;"><label style="font-size:0.75rem; font-weight:700; color:#64748b;">Tema:</label><input type="text" id="edit-tema" class="auth-input"></div>
+                <div><label style="font-size:0.75rem; font-weight:700; color:#64748b;">Responsável:</label><input type="text" id="edit-resp" class="auth-input"></div>
+                <div>
+                    <label style="font-size:0.75rem; font-weight:700; color:#64748b;">Status Atual:</label>
+                    <select id="edit-status" class="auth-input">
+                        <option value="Aberta">Aberta</option>
+                        <option value="Fechado">Fechado</option>
+                        <option value="Em análise">Em análise</option>
+                        <option value="Crítica">Crítica</option>
+                        <option value="Informativo">Informativo</option>
+                    </select>
+                </div>
+                <div style="grid-column:span 2;"><label style="font-size:0.75rem; font-weight:700; color:#64748b;">Data de Conclusão:</label><input type="date" id="edit-data-conclusao" class="auth-input"></div>
+                <div style="grid-column:span 2;"><label style="font-size:0.75rem; font-weight:700; color:#64748b;">Descrição Detalhada:</label><textarea id="edit-desc" rows="3" class="auth-input" style="height:auto;"></textarea></div>
+                <div style="grid-column:span 2;"><label style="font-size:0.75rem; font-weight:700; color:#64748b;">Ação Corretiva:</label><textarea id="edit-acao-full" rows="3" class="auth-input" style="height:auto;"></textarea></div>
+                <div style="grid-column:span 2; display:flex; justify-content:space-between; margin-top:16px;">
+                    <button type="button" id="btn-delete-ata" style="background:#fef2f2; color:#ef4444; border:1px solid #fee2e2; padding:12px 24px; border-radius:10px; cursor:pointer; font-weight:700;">Excluir Registro</button>
+                    <button type="submit" class="btn-success">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="specReportModal" class="modal"><div class="modal-content"><span style="float:right; cursor:pointer;" onclick="closeModal('specReportModal')">&times;</span><h3 style="color:var(--cor-primaria); margin-top:0;">Novo Relatório Técnico</h3><form id="spec-report-form" style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;"><input type="hidden" id="spec-edit-firestore-id"><div>ID:<input type="text" id="spec-input-id" readonly class="auth-input" style="background:#f1f5f9;"></div><div>Data:<input type="date" id="spec-input-data" class="auth-input" required></div><div style="grid-column:span 2;">Título:<input type="text" id="spec-input-titulo" class="auth-input" required></div><div style="grid-column:span 2;">Descrição:<textarea id="spec-input-desc" rows="4" class="auth-input" style="height:auto;" required></textarea></div><div style="grid-column:span 2; display:flex; justify-content:flex-end;"><button type="submit" class="btn-success">Criar Ficha</button></div></form></div></div>
+
+    <footer id="app-footer">
+        <div style="display:flex; align-items:center;"><span id="display-user" style="font-weight:600; color:white;">...</span><span id="display-role" class="footer-role-badge">VISITANTE</span></div>
+        <div style="font-weight:500;">QS PORTAL v6.5 • Monitoramento de Qualidade & Segurança</div>
+    </footer>
+
+    <!-- SCRIPT ORIGINAL PRESERVADO COM MODIFICAÇÕES ESPECÍFICAS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, setDoc, updateDoc, deleteDoc, doc, query, orderBy, serverTimestamp, where, limit, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyDUBT768YqcE-pMilfCI5b0ZWhUXSzZn00", authDomain: "quality-b1bc0.firebaseapp.com", projectId: "quality-b1bc0", storageBucket: "quality-b1bc0.firebasestorage.app", messagingSenderId: "533429820327", appId: "1:533429820327:web:9a557ce20959f7a15b3482", measurementId: "G-05NLDB604M" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        const _app_id = 'quality-management-sys';
+
+        let currentUser = null, currentRole = 'viewer', allData = [], statusChart = null;
+        let selectedReport = null, currentViewItem = null;
+        let authMode = 'login';
+        let currentSpecReports = [];
+        let currentPeriodicReports = [];
+        let activeSpecDocId = null;
+        let currentSortCol = 'seq', currentSortDir = 'asc';
+
+        async function logAction(action, module, docId, details) {
+            if (currentRole === 'viewer') return;
+            try { await addDoc(collection(db, 'artifacts', _app_id, 'public', 'data', 'audit_trail'), { timestamp: serverTimestamp(), userEmail: currentUser.email, action, module, docId, details }); } catch (e) { console.error(e); }
+        }
+
+        function setAppLoading(isLoading) {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (isLoading) { loadingScreen.style.display = 'flex'; } 
+            else { 
+                setTimeout(() => { 
+                    loadingScreen.style.opacity = '0'; 
+                    setTimeout(() => { loadingScreen.style.display = 'none'; loadingScreen.style.opacity = '1'; }, 400); 
+                }, 800); 
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                setAppLoading(true);
+                currentUser = user;
+                currentRole = await checkUserRole(user.email);
+                document.getElementById('display-user').textContent = user.email;
+                document.getElementById('display-role').textContent = currentRole.toUpperCase();
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('app-header').style.display = 'flex';
+                document.getElementById('app-footer').style.display = 'flex';
+                document.getElementById('btn-add-item-admin').style.display = (currentRole === 'admin') ? 'block' : 'none';
+                if (currentRole === 'admin') {
+                    document.getElementById('admin-report-controls').style.display = 'flex';
+                    document.getElementById('admin-spec-controls').style.display = 'flex';
+                    document.getElementById('nav-logs').style.display = 'inline';
+                } else {
+                    document.getElementById('admin-report-controls').style.display = 'none';
+                    document.getElementById('admin-spec-controls').style.display = 'none';
+                    document.getElementById('nav-logs').style.display = 'none';
+                }
+                showPage('dashboard-page');
+                await loadAtas();
+                setAppLoading(false);
+            } else { 
+                document.getElementById('auth-screen').style.display = 'flex'; 
+                document.getElementById('app-header').style.display = 'none'; 
+                document.getElementById('app-footer').style.display = 'none'; 
+            }
+        });
+
+        async function checkUserRole(email) {
+            const snap = await getDocs(query(collection(db, "usuarios"), where("email", "==", email)));
+            if (!snap.empty) {
+                const d = snap.docs[0].data();
+                if(d.isAdmin) return 'admin';
+                if(d.isEditor) return 'editor';
+            }
+            return 'viewer';
+        }
+
+        document.getElementById('auth-toggle').onclick = () => {
+            authMode = (authMode === 'login') ? 'register' : 'login';
+            document.querySelector('.auth-box h2').textContent = (authMode === 'login') ? "Qualidade & Segurança" : "Criar Nova Conta";
+            document.getElementById('login-btn').textContent = (authMode === 'login') ? "Acessar Sistema" : "Registrar Agora";
+            document.getElementById('forgot-password-link').style.display = (authMode === 'login') ? 'block' : 'none';
+        };
+
+        document.getElementById('login-btn').onclick = async () => {
+            const email = document.getElementById('email-input').value.trim();
+            const password = document.getElementById('password-input').value;
+            if(!email) return;
+            if(authMode === 'register') {
+                const domain = email.split('@')[1];
+                if(!['certiphic.com.br', 'benx.com.br'].includes(domain)) { alert("Domínio não autorizado."); return; }
+                try {
+                    const uc = await createUserWithEmailAndPassword(auth, email, password);
+                    await setDoc(doc(db, "usuarios", uc.user.uid), { email, isAdmin: false, isEditor: false, createdAt: serverTimestamp() });
+                } catch(err) { alert(err.message); }
+            } else if (authMode === 'login') {
+                signInWithEmailAndPassword(auth, email, password).catch(err => alert("Acesso negado."));
+            } else {
+                sendPasswordResetEmail(auth, email).then(() => alert("Link de recuperação enviado!")).catch(err => alert(err.message));
+            }
+        };
+
+        document.getElementById('logout-btn').onclick = () => signOut(auth);
+
+        function showPage(id) {
+            document.querySelectorAll('.container').forEach(p => { p.classList.remove('show'); p.style.display = 'none'; });
+            const el = document.getElementById(id); 
+            if(el) { el.style.display = 'block'; setTimeout(() => el.classList.add('show'), 10); }
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+            const map = {'dashboard-page':'nav-dashboard','report-page':'nav-report','relatorios-esp-page':'nav-relatorios-esp','apontamentos-page':'nav-apontamentos','ckl-page':'nav-ckl','logs-page':'nav-logs'};
+            const navId = map[id]; if(navId) document.getElementById(navId).classList.add('active');
+            if(id === 'report-page') loadReports();
+            if(id === 'relatorios-esp-page') loadExtraReports();
+            if(id === 'logs-page') loadAuditTrail();
+        }
+
+        document.getElementById('nav-dashboard').onclick = () => showPage('dashboard-page');
+        document.getElementById('nav-report').onclick = () => showPage('report-page');
+        document.getElementById('nav-relatorios-esp').onclick = () => showPage('relatorios-esp-page');
+        document.getElementById('nav-apontamentos').onclick = () => showPage('apontamentos-page');
+        document.getElementById('nav-ckl').onclick = () => showPage('ckl-page');
+        document.getElementById('nav-logs').onclick = () => showPage('logs-page');
+
+        async function loadAtas() {
+            const snap = await getDocs(query(collection(db, "atas"), orderBy("seq", "asc")));
+            allData = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            
+            // Popula os outros select normais
+            populateSelect('filter-tema', [...new Set(allData.map(d => d.tema))]);
+            populateSelect('filter-assunto', [...new Set(allData.map(d => d.assunto))]);
+            
+            // Popula o Multiselect de Status
+            populateStatusMultiselect([...new Set(allData.map(d => d.status))]);
+            
+            document.getElementById('filter-tema').onchange = applyFilters;
+            document.getElementById('filter-assunto').onchange = applyFilters;
+            
+            document.getElementById('btn-clear-filters').onclick = () => { 
+                // Reset do Multiselect de Status (Todos selecionados por default)
+                const checkboxes = document.querySelectorAll('#multiselect-status-options input');
+                checkboxes.forEach(cb => cb.checked = true);
+                updateStatusLabel();
+                
+                document.getElementById('filter-tema').value = ""; 
+                document.getElementById('filter-assunto').value = ""; 
+                applyFilters(); 
+            };
+            applyFilters();
+        }
+
+        // --- LÓGICA DO CUSTOM MULTISELECT ---
+        function populateStatusMultiselect(items) {
+            const container = document.getElementById('multiselect-status-options');
+            container.innerHTML = "";
+            const sortedItems = items.filter(i => i).sort();
+            
+            sortedItems.forEach(item => {
+                const label = document.createElement('label');
+                label.className = 'multiselect-option';
+                label.innerHTML = `<input type="checkbox" value="${item}" checked><span>${item}</span>`;
+                
+                // Event listener para o checkbox
+                label.querySelector('input').addEventListener('change', () => {
+                    updateStatusLabel();
+                    applyFilters();
+                });
+                
+                container.appendChild(label);
+            });
+            updateStatusLabel();
+        }
+
+        function updateStatusLabel() {
+            const checkboxes = document.querySelectorAll('#multiselect-status-options input');
+            const checked = Array.from(checkboxes).filter(cb => cb.checked);
+            const label = document.getElementById('multiselect-status-label');
+            
+            if (checked.length === checkboxes.length) {
+                label.textContent = "Todos os Status";
+            } else if (checked.length === 0) {
+                label.textContent = "Nenhum selecionado";
+            } else {
+                label.textContent = checked.length + " selecionado(s)";
+            }
+        }
+
+        // Toggle do Menu Multiselect
+        document.getElementById('multiselect-status-label').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('multiselect-status-options').classList.toggle('show');
+        });
+
+        // Fechar dropdown ao clicar fora
+        document.addEventListener('click', () => {
+            document.getElementById('multiselect-status-options').classList.remove('show');
+        });
+
+        function populateSelect(id, items) { 
+            const el = document.getElementById(id); 
+            const label = id.split('-')[1];
+            const plural = label === 'status' ? 'Status' : label.charAt(0).toUpperCase() + label.slice(1) + 's';
+            
+            el.innerHTML = `<option value="">Todos os ${plural}</option>`; 
+            items.filter(i => i).sort().forEach(i => { 
+                const opt = document.createElement('option'); 
+                opt.value = i; 
+                opt.textContent = i; 
+                el.appendChild(opt); 
+            }); 
+        }
+
+        window.applyFilters = function() {
+            // Captura status dos checkboxes do multiselect
+            const checkboxes = document.querySelectorAll('#multiselect-status-options input');
+            const fS = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+            
+            const fT = document.getElementById('filter-tema').value;
+            const fA = document.getElementById('filter-assunto').value;
+            
+            let filtered = allData.filter(d => {
+                const matchStatus = fS.includes(d.status);
+                const matchTema = !fT || d.tema === fT;
+                const matchAssunto = !fA || d.assunto === fA;
+                return matchStatus && matchTema && matchAssunto;
+            });
+
+            filtered.sort((a, b) => {
+                let valA = a[currentSortCol] || "", valB = b[currentSortCol] || "";
+                if (currentSortCol === 'seq') { valA = parseInt(valA) || 0; valB = parseInt(valB) || 0; }
+                if (valA < valB) return currentSortDir === 'asc' ? -1 : 1;
+                if (valA > valB) return currentSortDir === 'asc' ? 1 : -1;
+                return 0;
+            });
+            renderDashboard(filtered); renderTable(filtered);
+        }
+
+        window.handleSort = function(col) {
+            if (currentSortCol === col) currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+            else { currentSortCol = col; currentSortDir = 'asc'; }
+            applyFilters();
+        };
+
+        function renderDashboard(data) {
+            const acionaveis = data.filter(d => d.status !== 'Informativo'), fechados = acionaveis.filter(d => d.status === 'Fechado');
+            document.getElementById('kpi-performance').textContent = acionaveis.length ? ((fechados.length / acionaveis.length) * 100).toFixed(1) + "%" : "0%";
+            let totalDays = 0, countWithDates = 0;
+            fechados.forEach(d => { if(d.dataAta && d.dataConclusao) { const dt1 = new Date(d.dataAta), dt2 = new Date(d.dataConclusao); const diff = Math.ceil(Math.abs(dt2 - dt1) / (1000 * 60 * 60 * 24)); totalDays += diff; countWithDates++; } });
+            document.getElementById('kpi-sla').textContent = countWithDates > 0 ? Math.round(totalDays / countWithDates) + "d" : "0d";
+            document.getElementById('kpi-open').textContent = acionaveis.filter(d => d.status !== 'Fechado').length;
+            document.getElementById('kpi-total-filtered').textContent = data.length;
+            updateChart(data);
+            const summaryEl = document.getElementById('summary-cards-list'); summaryEl.innerHTML = "";
+            const grupos = {}; data.forEach(d => { if(!grupos[d.assunto]) grupos[d.assunto] = { total: 0, s: {} }; grupos[d.assunto].total++; grupos[d.assunto].s[d.status] = (grupos[d.assunto].s[d.status] || 0) + 1; });
+            Object.keys(grupos).forEach(key => { const g = grupos[key]; const card = document.createElement('div'); card.className = 'summary-mini-card'; card.innerHTML = `<div class="title">${key}</div><div class="main-count">${g.total}</div><div style="font-size:0.65rem; color:#94a3b8; font-weight:600;">${Object.keys(g.s).map(s => `${s}: ${g.s[s]}`).join(' | ')}</div>`; summaryEl.appendChild(card); });
+        }
+
+        function updateChart(data) {
+            const ctx = document.getElementById('statusChart').getContext('2d'), counts = { Fechado:0, Aberta:0, 'Em análise':0, Crítica:0, Informativo:0 };
+            data.forEach(d => { if(counts.hasOwnProperty(d.status)) counts[d.status]++; });
+            if(statusChart) statusChart.destroy();
+            
+            const colors = ['#88B04B', '#FF6B6B', '#FFD93D', '#C0392B', '#95A5A6'];
+            
+            statusChart = new Chart(ctx, { 
+                type: 'pie', 
+                data: { 
+                    labels: Object.keys(counts), 
+                    datasets: [{ 
+                        data: Object.values(counts), 
+                        backgroundColor: colors, 
+                        hoverBackgroundColor: colors.map(c => c + 'EE'),
+                        borderWidth: 3,
+                        borderColor: '#ffffff',
+                        hoverOffset: 15,
+                        offset: 4
+                    }] 
+                }, 
+                plugins: [ChartDataLabels], 
+                options: { 
+                    devicePixelRatio: window.devicePixelRatio || 2,
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    layout: { padding: 10 },
+                    plugins: { 
+                        legend: { 
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 8,
+                                boxHeight: 8,
+                                padding: 12,
+                                color: '#64748b',
+                                font: { size: 10, family: "'Inter', sans-serif", weight: 500 },
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        }, 
+                        datalabels: { 
+                            color: '#ffffff', 
+                            font: { weight: 'bold', size: 10, family: "'Inter', sans-serif" }, 
+                            formatter: (v, c) => { 
+                                let sum = 0; 
+                                c.chart.data.datasets[0].data.map(d => sum += d); 
+                                return v > 0 ? (v * 100 / sum).toFixed(0) + "%" : null; 
+                            },
+                            textShadowColor: 'rgba(0,0,0,0.3)',
+                            textShadowBlur: 4
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(1, 69, 92, 0.9)',
+                            titleFont: { family: 'Inter', size: 12, weight: 'bold' },
+                            bodyFont: { family: 'Inter', size: 12 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: true
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                } 
+            });
+        }
+
+        function renderTable(data) { 
+            const tbody = document.querySelector("#dataTable tbody"); tbody.innerHTML = ""; 
+            data.forEach(item => { 
+                const tr = document.createElement('tr'); 
+                tr.innerHTML = `<td>${item.seq || '-'}</td><td>${item.dataAta || '-'}</td><td>${item.tema || '-'}</td><td style="font-weight:600;">${item.assunto || '-'}</td><td>${item.responsavel || '-'}</td><td>${item.dataConclusao || '-'}</td><td><span class="status-badge status-${(item.status||'').replace(/\s/g,'')}">${item.status}</span> <span style="cursor:help; font-size:10px; opacity:0.3;" onclick="event.stopPropagation(); showHistory('atas', '${item.id}', '${item.assunto}')">🕒</span></td>`; 
+                tr.onclick = () => openViewItem(item); 
+                tbody.appendChild(tr); 
+            }); 
+        }
+
+        function openViewItem(item) {
+            currentViewItem = item;
+            document.getElementById('view-modal-title').textContent = `Registro Seq #${item.seq || ''}`;
+            document.getElementById('view-descricao').textContent = item.descricao || 'Nenhuma descrição detalhada informada.';
+            const actionContainer = document.getElementById('view-acao-container');
+            const saveBtn = document.getElementById('btn-save-acao-editor');
+            const adminEditBtn = document.getElementById('btn-open-edit-admin');
+            actionContainer.innerHTML = ''; saveBtn.style.display = 'none'; adminEditBtn.style.display = 'none';
+            if (currentRole === 'editor') {
+                const textarea = document.createElement('textarea'); textarea.className = 'auth-input'; textarea.style.height = '120px'; textarea.value = item.acao || ''; actionContainer.appendChild(textarea); saveBtn.style.display = 'block';
+            } else {
+                const p = document.createElement('p'); p.style = "font-size:0.95rem; line-height:1.6; color:#334155;"; p.textContent = item.acao || 'Nenhuma ação ou pendência registrada para este item.'; actionContainer.appendChild(p);
+            }
+            if (currentRole === 'admin') adminEditBtn.style.display = 'block';
+            document.getElementById('viewModal').style.display = 'block';
+        }
+
+        document.getElementById('btn-save-acao-editor').onclick = async () => {
+            const newAcao = document.querySelector('#view-acao-container textarea').value;
+            await updateDoc(doc(db, "atas", currentViewItem.id), { acao: newAcao, lastModifiedBy: currentUser.email, lastModifiedAt: serverTimestamp() });
+            await logAction("Edição Ação", "Atas", currentViewItem.id, `Atualizada ação: ${currentViewItem.assunto}`);
+            closeModal('viewModal'); loadAtas();
+        };
+
+        document.getElementById('btn-open-edit-admin').onclick = () => { closeModal('viewModal'); openEditAta(currentViewItem); };
+
+        function openEditAta(item) {
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('edit-seq').value = item.seq || '';
+            document.getElementById('edit-data').value = item.dataAta || '';
+            document.getElementById('edit-assunto').value = item.assunto || '';
+            document.getElementById('edit-tema').value = item.tema || '';
+            document.getElementById('edit-resp').value = item.responsavel || '';
+            document.getElementById('edit-status').value = item.status || 'Aberta';
+            document.getElementById('edit-data-conclusao').value = item.dataConclusao || '';
+            document.getElementById('edit-desc').value = item.descricao || '';
+            document.getElementById('edit-acao-full').value = item.acao || '';
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        document.getElementById('ata-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const data = { 
+                seq: document.getElementById('edit-seq').value, 
+                dataAta: document.getElementById('edit-data').value, 
+                assunto: document.getElementById('edit-assunto').value, 
+                tema: document.getElementById('edit-tema').value, 
+                responsavel: document.getElementById('edit-resp').value, 
+                status: document.getElementById('edit-status').value, 
+                dataConclusao: document.getElementById('edit-data-conclusao').value,
+                descricao: document.getElementById('edit-desc').value, 
+                acao: document.getElementById('edit-acao-full').value, 
+                lastModifiedBy: currentUser.email, 
+                lastModifiedAt: serverTimestamp() 
+            };
+            if(id) { await updateDoc(doc(db, "atas", id), data); await logAction("Edição Admin", "Atas", id, data.assunto); }
+            else { const n = await addDoc(collection(db, "atas"), { ...data, createdBy: currentUser.email, createdAt: serverTimestamp() }); await logAction("Adição Admin", "Atas", n.id, data.assunto); }
+            closeModal('editModal'); loadAtas();
+        };
+
+        document.getElementById('btn-delete-ata').onclick = async () => {
+            const id = document.getElementById('edit-id').value;
+            if(id && confirm("Deseja realmente excluir este registro? Esta ação é irreversível.")) { await deleteDoc(doc(db, "atas", id)); await logAction("Exclusão Admin", "Atas", id, "Item removido."); closeModal('editModal'); loadAtas(); }
+        };
+
+        document.getElementById('btn-add-item-admin').onclick = () => {
+            document.getElementById('ata-form').reset();
+            document.getElementById('edit-id').value = '';
+            let maxSeq = 0; allData.forEach(d => { let num = parseInt(d.seq); if (!isNaN(num) && num > maxSeq) maxSeq = num; });
+            document.getElementById('edit-seq').value = maxSeq + 1;
+            document.getElementById('editModal').style.display = 'block';
+        };
+
+        async function loadReports() {
+            try {
+                const snap = await getDocs(query(collection(db, "reports"), orderBy("reportDate", "desc")));
+                currentPeriodicReports = snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
+                const carousel = document.getElementById('reports-carousel'); carousel.innerHTML = "";
+                let first = true;
+                if (snap.empty) { document.getElementById('no-pdf-msg').style.display = 'block'; return; }
+                currentPeriodicReports.forEach(rep => {
+                    const div = document.createElement('div');
+                    div.className = 'report-item' + (first ? ' active' : '');
+                    div.innerHTML = `<div style="font-weight:700; color:var(--cor-primaria); margin-bottom:4px;">${rep.reportDate.split('-').reverse().join('/')}</div><div style="font-size:11px; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${rep.name}</div>`;
+                    div.onclick = () => { document.querySelectorAll('.report-item').forEach(el => el.classList.remove('active')); div.classList.add('active'); loadPdf(rep.url, rep.firestoreId); };
+                    carousel.appendChild(div);
+                    if(first) { loadPdf(rep.url, rep.firestoreId); first = false; }
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadPdf(url, id) {
+            selectedReport = { url, id };
+            document.getElementById('btn-update-rev').style.display = (currentRole === 'admin') ? 'inline-block' : 'none';
+            document.getElementById('no-pdf-msg').style.display = 'none';
+            document.getElementById('pdf-frame').style.display = 'block'; 
+            document.getElementById('pdf-frame').src = url;
+        }
+
+        document.getElementById('btn-maximize-report').onclick = () => {
+            const container = document.getElementById('pdf-render-container');
+            if (!document.fullscreenElement) { container.requestFullscreen(); } 
+            else { document.exitFullscreen(); }
+        };
+
+        document.getElementById('btn-trigger-upload-new').onclick = () => document.getElementById('report-file-input').click();
+        document.getElementById('btn-update-rev').onclick = () => document.getElementById('report-file-input').click();
+
+        document.getElementById('report-file-input').onchange = async (e) => {
+            const file = e.target.files[0];
+            const date = document.getElementById('report-date-input').value;
+            const isUpdate = (document.activeElement.id === 'btn-update-rev');
+            if(!file) return;
+            if(!date && !isUpdate) { alert("Informe a Data de Competência."); return; }
+            document.getElementById('upload-status').textContent = "PROCESSANDO...";
+            try {
+                const sRef = ref(storage, `reports/${Date.now()}_${file.name}`);
+                await uploadBytes(sRef, file);
+                const url = await getDownloadURL(sRef);
+                if(isUpdate && selectedReport) { await updateDoc(doc(db, "reports", selectedReport.id), { url, name: file.name, lastModifiedBy: currentUser.email, lastModifiedAt: serverTimestamp() }); } 
+                else { await addDoc(collection(db, "reports"), { id: Date.now().toString().slice(-4), name: file.name, url, reportDate: date, createdBy: currentUser.email, createdAt: serverTimestamp() }); }
+                document.getElementById('upload-status').textContent = "CONCLUÍDO"; loadReports();
+            } catch (err) { alert("Erro no upload."); }
+        };
+
+        async function loadExtraReports() {
+            const listEl = document.getElementById('extra-reports-list');
+            listEl.innerHTML = "<p>Carregando banco de dados...</p>";
+            try {
+                const snap = await getDocs(query(collection(db, "specific_reports"), orderBy("id", "asc")));
+                currentSpecReports = snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
+                listEl.innerHTML = "";
+                currentSpecReports.forEach(r => {
+                    const card = document.createElement('div');
+                    card.style = "background:#fff; padding:24px; border-radius:16px; border:1px solid #e2e8f0; box-shadow:var(--sombra-sm); display:flex; flex-direction:column; gap:12px; transition:var(--transicao);";
+                    card.innerHTML = `
+                        <span style="font-weight:800; font-size:0.75rem; color:var(--cor-secundaria);">ID #${r.id}</span>
+                        <strong style="color:var(--cor-primaria); font-size:1rem;">${r.titulo}</strong>
+                        <p style="font-size:0.85rem; color:#64748b; line-height:1.5;">${r.descricao}</p>
+                        <div style="margin-top:auto; padding-top:16px; display:flex; gap:8px;"> 
+                            ${r.url ? `<button class="btn-success" style="padding:6px 12px; font-size:0.75rem;" onclick="openInternalSpecPdf('${r.url}')">VISUALIZAR</button>` : `<span style="color:#ef4444; font-size:0.75rem; font-weight:700;">PDF INDISPONÍVEL</span>`} 
+                            ${currentRole === 'admin' ? `<button class="btn-clear" style="padding:6px 12px; font-size:0.75rem;" onclick="triggerSpecPdfUpload('${r.firestoreId}')">VINCULAR</button>` : ''} 
+                        </div>`;
+                    listEl.appendChild(card);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        window.openInternalSpecPdf = (url) => {
+            const frame = document.getElementById('spec-pdf-frame');
+            frame.src = url;
+            document.getElementById('specPdfModal').style.display = 'block';
+        };
+
+        document.getElementById('btn-import-json-spec').onclick = () => document.getElementById('json-spec-input').click();
+        document.getElementById('json-spec-input').onchange = async (e) => {
+            const file = e.target.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const jsonData = JSON.parse(event.target.result);
+                    const batch = writeBatch(db);
+                    const dataArray = Array.isArray(jsonData) ? jsonData : [jsonData];
+                    dataArray.forEach(item => {
+                        const newRef = doc(collection(db, "specific_reports"));
+                        batch.set(newRef, { ...item, id: String(item.id).padStart(2, '0'), createdBy: currentUser.email, createdAt: serverTimestamp() });
+                    });
+                    await batch.commit(); alert("Importação realizada com sucesso!"); loadExtraReports();
+                } catch (err) { alert("Falha ao processar arquivo JSON."); }
+            };
+            reader.readAsText(file);
+        };
+
+        document.getElementById('btn-new-spec-manual').onclick = () => {
+            document.getElementById('spec-report-form').reset();
+            let maxId = 0; currentSpecReports.forEach(r => { let num = parseInt(r.id); if(num > maxId) maxId = num; });
+            document.getElementById('spec-input-id').value = String(maxId + 1).padStart(2, '0');
+            document.getElementById('specReportModal').style.display = 'block';
+        };
+
+        document.getElementById('spec-report-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = { id: document.getElementById('spec-input-id').value, titulo: document.getElementById('spec-input-titulo').value, descricao: document.getElementById('spec-input-desc').value, data: document.getElementById('spec-input-data').value, url: "", createdBy: currentUser.email, createdAt: serverTimestamp() };
+            await addDoc(collection(db, "specific_reports"), data); closeModal('specReportModal'); loadExtraReports();
+        };
+
+        window.triggerSpecPdfUpload = (id) => { activeSpecDocId = id; document.getElementById('pdf-spec-upload-hidden').click(); };
+        document.getElementById('pdf-spec-upload-hidden').onchange = async (e) => {
+            const file = e.target.files[0]; if(!file || !activeSpecDocId) return;
+            const sRef = ref(storage, `specific_reports/${Date.now()}_${file.name}`);
+            await uploadBytes(sRef, file);
+            const url = await getDownloadURL(sRef);
+            await updateDoc(doc(db, "specific_reports", activeSpecDocId), { url, lastModifiedBy: currentUser.email, lastModifiedAt: serverTimestamp() });
+            loadExtraReports();
+        };
+
+        window.showHistory = async (coll, docId, title) => { 
+            const histEl = document.getElementById('hist-content'); histEl.innerHTML = "Consultando trilha..."; 
+            document.getElementById('hist-title').textContent = "Trilha: " + title; 
+            document.getElementById('historyModal').style.display = 'block'; 
+            const snap = await getDocs(query(collection(db, coll), where("__name__", "==", docId))); 
+            if(!snap.empty) { 
+                const data = snap.docs[0].data(); 
+                histEl.innerHTML = `<p><strong>Criação:</strong> ${data.createdBy || 'N/A'}<br><small>${data.createdAt ? new Date(data.createdAt.seconds*1000).toLocaleString() : 'N/A'}</small></p><hr style="border:0; border-top:1px solid #e2e8f0; margin:16px 0;"><p><strong>Última Alteração:</strong> ${data.lastModifiedBy || 'N/A'}<br><small>${data.lastModifiedAt ? new Date(data.lastModifiedAt.seconds*1000).toLocaleString() : 'N/A'}</small></p>`; 
+            } 
+        };
+
+        async function loadAuditTrail() { 
+            if(currentRole !== 'admin') return; 
+            const snap = await getDocs(query(collection(db, 'artifacts', _app_id, 'public', 'data', 'audit_trail'), orderBy('timestamp', 'desc'), limit(100))); 
+            const tbody = document.querySelector("#logsTable tbody"); tbody.innerHTML = ""; 
+            snap.forEach(d => { 
+                const l = d.data(); const tr = document.createElement('tr'); 
+                tr.innerHTML = `<td>${l.timestamp?new Date(l.timestamp.seconds*1000).toLocaleString():'-'}</td><td>${l.userEmail}</td><td>${l.action}</td><td>${l.module}</td><td>${l.docId.substring(0,6)}...</td><td>${l.details}</td>`; 
+                tbody.appendChild(tr); 
+            }); 
+        }
+
+        document.getElementById('btn-download-logs').onclick = async () => { 
+            const snap = await getDocs(query(collection(db, 'artifacts', _app_id, 'public', 'data', 'audit_trail'), orderBy('timestamp', 'desc'))); 
+            let txt = "QS PORTAL - AUDIT TRAIL\n\n"; 
+            snap.forEach(d => { const l = d.data(); txt += `[${l.timestamp?new Date(l.timestamp.seconds*1000).toISOString():'N/A'}] ${l.userEmail} | ${l.action} | ${l.module} | ${l.details}\n`; }); 
+            const blob = new Blob([txt], { type: 'text/plain' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "auditoria_qualidade.txt"; a.click(); 
+        };
+
+        window.closeModal = (id) => {
+            document.getElementById(id).style.display = 'none';
+            if(id === 'specPdfModal') document.getElementById('spec-pdf-frame').src = "";
+        };
+    </script>
+</body>
+</html>
